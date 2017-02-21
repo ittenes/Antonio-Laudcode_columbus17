@@ -12,10 +12,14 @@ import threading
 from scipy import misc
 import tensorflow as tf
 import numpy as np
-try:
-    from tensorflow.models.rnn import rnn_cell
-except ImportError:
-    rnn_cell = tf.nn.rnn_cell
+from distutils.version import LooseVersion
+if LooseVersion(tf.__version__) >= LooseVersion('1.0'):
+    rnn_cell = tf.contrib.rnn
+else:
+    try:
+        from tensorflow.models.rnn import rnn_cell
+    except ImportError:
+        rnn_cell = tf.nn.rnn_cell
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import array_ops
 

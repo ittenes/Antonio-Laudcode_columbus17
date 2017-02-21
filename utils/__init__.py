@@ -1,4 +1,5 @@
 
+import tensorflow as tf
 from distutils.version import LooseVersion
 
 TENSORFLOW_VERSION = LooseVersion(tf.__version__)
