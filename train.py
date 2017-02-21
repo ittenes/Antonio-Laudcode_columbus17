@@ -292,10 +292,10 @@ def build_forward_backward(H, x, phase, boxes, flags):
                                outer_size * H['solver']['head_weights'][1] * 0.03)
                 boxes_loss = delta_boxes_loss
 
-                tf.histogram_summary(phase + '/delta_hist0_x', pred_boxes_deltas[:, 0, 0])
-                tf.histogram_summary(phase + '/delta_hist0_y', pred_boxes_deltas[:, 0, 1])
-                tf.histogram_summary(phase + '/delta_hist0_w', pred_boxes_deltas[:, 0, 2])
-                tf.histogram_summary(phase + '/delta_hist0_h', pred_boxes_deltas[:, 0, 3])
+                tf.summary.histogram(phase + '/delta_hist0_x', pred_boxes_deltas[:, 0, 0])
+                tf.summary.histogram(phase + '/delta_hist0_y', pred_boxes_deltas[:, 0, 1])
+                tf.summary.histogram(phase + '/delta_hist0_w', pred_boxes_deltas[:, 0, 2])
+                tf.summary.histogram(phase + '/delta_hist0_h', pred_boxes_deltas[:, 0, 3])
                 loss += delta_boxes_loss
         else:
             loss = confidences_loss + boxes_loss
@@ -364,13 +364,13 @@ def build(H, q):
                                           ])
 
             for p in ['train', 'test']:
-                tf.scalar_summary('%s/accuracy' % p, accuracy[p])
-                tf.scalar_summary('%s/accuracy/smooth' % p, moving_avg.average(accuracy[p]))
-                tf.scalar_summary("%s/confidences_loss" % p, confidences_loss[p])
-                tf.scalar_summary("%s/confidences_loss/smooth" % p,
+                tf.summary.scalar('%s/accuracy' % p, accuracy[p])
+                tf.summary.scalar('%s/accuracy/smooth' % p, moving_avg.average(accuracy[p]))
+                tf.summary.scalar("%s/confidences_loss" % p, confidences_loss[p])
+                tf.summary.scalar("%s/confidences_loss/smooth" % p,
                     moving_avg.average(confidences_loss[p]))
-                tf.scalar_summary("%s/regression_loss" % p, boxes_loss[p])
-                tf.scalar_summary("%s/regression_loss/smooth" % p,
+                tf.summary.scalar("%s/regression_loss" % p, boxes_loss[p])
+                tf.summary.scalar("%s/regression_loss/smooth" % p,
                     moving_avg.average(boxes_loss[p]))
 
         if phase == 'test':
@@ -400,10 +400,10 @@ def build(H, q):
             true_log_img = tf.py_func(log_image,
                                       [test_image, test_true_confidences, test_true_boxes, global_step, 'true'],
                                       [tf.float32])
-            tf.image_summary(phase + '/pred_boxes', tf.pack(pred_log_img),max_images=10)
-            tf.image_summary(phase + '/true_boxes', tf.pack(true_log_img),max_images=10)
+            tf.summary.image(phase + '/pred_boxes', pred_log_img, max_outputs=10)
+            tf.summary.image(phase + '/true_boxes', true_log_img, max_outputs=10)
 
-    summary_op = tf.merge_all_summaries()
+    summary_op = tf.summary.merge_all()
 
     return (config, loss, accuracy, summary_op, train_op,
             smooth_op, global_step, learning_rate)
@@ -448,7 +448,7 @@ def train(H, test_images):
      smooth_op, global_step, learning_rate) = build(H, q)
 
     saver = tf.train.Saver(max_to_keep=None)
-    writer = tf.train.SummaryWriter(
+    writer = tf.summary.FileWriter(
         logdir=H['save_dir'],
         flush_secs=10
     )
