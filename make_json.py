@@ -106,6 +106,14 @@ def onclick(event):  #called when anywhere inside the window is clicked
         else:
             top_corners.append([event.xdata,event.ydata])
 
+def undo(event):  #called when the undo button is hit
+    # Only act when a path was drawn
+    if (len(top_corners) ==  len(bottom_corners)):
+        bottom_corners.pop()
+        top_corners.pop()
+        to_remove = patchCache.pop()
+        to_remove.remove()
+
 ax = plt.gca()
 
 #get our files for processing
@@ -131,9 +139,12 @@ fig = plt.gcf()
 fig.canvas.mpl_connect('button_press_event', onclick)
 
 #add the buttons to the bottom of the window
+axundo = plt.axes([0.59, 0.01, 0.1, 0.075])
 axnext = plt.axes([0.7, 0.01, 0.1, 0.075])
 axclear = plt.axes([0.81, 0.01, 0.1, 0.075])
 axskip = plt.axes([0.92, 0.01, 0.1, 0.075])
+bundo = Button(axundo, 'Undo')
+bundo.on_clicked(undo)
 bnext = Button(axnext, 'Next')
 bnext.on_clicked(next)
 bclear = Button(axclear, 'Clear')
