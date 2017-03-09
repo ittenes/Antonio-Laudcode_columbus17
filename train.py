@@ -466,7 +466,7 @@ def train(H, test_images):
             t.start()
 
         tf.set_random_seed(H['solver']['rnd_seed'])
-        sess.run(tf.initialize_all_variables())
+        sess.run(tf.global_variables_initializer())
         writer.add_graph(sess.graph)
         weights_str = H['solver']['weights']
         if len(weights_str) > 0:
@@ -475,10 +475,10 @@ def train(H, test_images):
         else:
             init_fn = slim.assign_from_checkpoint_fn(
                   '%s/data/%s' % (os.path.dirname(os.path.realpath(__file__)), H['slim_ckpt']),
-                  [x for x in tf.all_variables() if x.name.startswith(H['slim_basename']) and H['solver']['opt'] not in x.name])
+                  [x for x in tf.global_variables() if x.name.startswith(H['slim_basename']) and H['solver']['opt'] not in x.name])
             #init_fn = slim.assign_from_checkpoint_fn(
                   #'%s/data/inception_v1.ckpt' % os.path.dirname(os.path.realpath(__file__)),
-                  #[x for x in tf.all_variables() if x.name.startswith('InceptionV1') and not H['solver']['opt'] in x.name])
+                  #[x for x in tf.global_variables() if x.name.startswith('InceptionV1') and not H['solver']['opt'] in x.name])
             init_fn(sess)
 
         # train model for N iterations
