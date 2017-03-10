@@ -31,7 +31,7 @@ def get_results(args, H):
         pred_boxes, pred_logits, pred_confidences = build_forward(H, tf.expand_dims(x_in, 0), 'test', reuse=None)
     saver = tf.train.Saver()
     with tf.Session() as sess:
-        sess.run(tf.initialize_all_variables())
+        sess.run(tf.global_variables_initializer())
         saver.restore(sess, args.weights)
 
         pred_annolist = al.AnnoList()
