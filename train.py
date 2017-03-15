@@ -528,12 +528,15 @@ def main():
     parser.add_argument('--weights', default=None, type=str)
     parser.add_argument('--gpu', default=None, type=int)
     parser.add_argument('--hypes', required=True, type=str)
+    parser.add_argument('--max_iter', required=False, type=int, default=None)
     parser.add_argument('--logdir', default='output', type=str)
     args = parser.parse_args()
     with open(args.hypes, 'r') as f:
         H = json.load(f)
     if args.gpu is not None:
         H['solver']['gpu'] = args.gpu
+    if args.max_iter is not None:
+        H['solver']['max_iter'] = args.max_iter
     if len(H.get('exp_name', '')) == 0:
         H['exp_name'] = args.hypes.split('/')[-1].replace('.json', '')
     H['save_dir'] = args.logdir + '/%s_%s' % (H['exp_name'],
