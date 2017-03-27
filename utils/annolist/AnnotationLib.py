@@ -134,7 +134,8 @@ class AnnoList(MutableSequence):
         del self._list[ii]
 
     def __setitem__(self, ii, val):
-        return self._list[ii] = val
+        self._list[ii] = val
+        return self._list[ii]
 
     def __str__(self):
         return self.__repr__()
