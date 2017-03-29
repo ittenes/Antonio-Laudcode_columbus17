@@ -44,7 +44,11 @@ def annotation_to_h5(H, a):
 
         for bidx, box in enumerate(sorted(unsorted_boxes, key=lambda x: x[0]**2 + x[1]**2)):
             boxes[cidx, bidx,  :] = box
-            box_flags[cidx, bidx] = max(box_list[cidx][bidx].silhouetteID, 1)
+            if H['num_classes'] <= 2:
+                box_flags[cidx, bidx] = max(box_list[cidx][bidx].silhouetteID, 1)
+            else: # multiclass detection
+                # Note: class 0 reserved for empty boxes
+                box_flags[cidx, bidx] = box_list[cidx][bidx].classID 
 
     return boxes, box_flags
 
