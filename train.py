@@ -344,7 +344,8 @@ def build(H, q):
         pred_boxes_r = tf.reshape(pred_boxes, [H['batch_size'], grid_size, H['rnn_len'], 4])
 
         # Set up summary operations for tensorboard
-        accuracy[phase] = tf.contrib.metrics.accuracy(tf.argmax(confidences,  3),  tf.argmax(pred_confidences_r,  3))
+        a = tf.equal(tf.argmax(confidences, 3),  tf.argmax(pred_confidences_r, 3))
+        accuracy[phase] = tf.reduce_mean(tf.cast(a, 'float32'), name=phase+'/accuracy')
 
         if phase == 'train':
             global_step = tf.Variable(0, trainable=False)
