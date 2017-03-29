@@ -329,12 +329,13 @@ def build(H, q):
         raise ValueError('Unrecognized opt type')
     loss, accuracy, confidences_loss, boxes_loss = {}, {}, {}, {}
     for phase in ['train', 'test']:
-        # generate predictions and losses from forward pass
+        # get ground truth data
         x, confidences, boxes = q[phase].dequeue_many(arch['batch_size'])
         flags = tf.argmax(confidences, 3)
 
-
+        # generate predictions and losses from forward pass
         grid_size = H['grid_width'] * H['grid_height']
+        assert(H['num_classes'] == arch['num_classes'])
 
         (pred_boxes, pred_confidences,
          loss[phase], confidences_loss[phase],
@@ -342,10 +343,8 @@ def build(H, q):
         pred_confidences_r = tf.reshape(pred_confidences, [H['batch_size'], grid_size, H['rnn_len'], arch['num_classes']])
         pred_boxes_r = tf.reshape(pred_boxes, [H['batch_size'], grid_size, H['rnn_len'], 4])
 
-
         # Set up summary operations for tensorboard
-        a = tf.equal(tf.argmax(confidences[:, :, 0, :], 2), tf.argmax(pred_confidences_r[:, :, 0, :], 2))
-        accuracy[phase] = tf.reduce_mean(tf.cast(a, 'float32'), name=phase+'/accuracy')
+        accuracy[phase] = tf.contrib.metrics.accuracy(tf.argmax(confidences,  3),  tf.argmax(pred_confidences_r,  3))
 
         if phase == 'train':
             global_step = tf.Variable(0, trainable=False)

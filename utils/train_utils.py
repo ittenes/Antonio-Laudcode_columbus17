@@ -1,6 +1,5 @@
 import numpy as np
 import random
-import json
 import os
 import cv2
 import itertools
@@ -88,7 +87,6 @@ def load_data_gen(H, phase, jitter):
         output['image'] = d['image']
         output['confs'] = np.array([[make_sparse(int(detection), d=H['num_classes']) for detection in cell] for cell in flags])
         output['boxes'] = boxes
-        output['flags'] = flags
 
         yield output
 
