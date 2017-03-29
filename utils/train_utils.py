@@ -42,7 +42,7 @@ def load_idl_tf(idlfile, H, jitter):
         random.shuffle(annos)
         for anno in annos:
             I = imread(anno.imageName)
-	    #Skip Greyscale images
+            #Skip Greyscale images
             if len(I.shape) < 3:
                 continue
             if I.shape[2] == 4:
@@ -62,11 +62,7 @@ def load_idl_tf(idlfile, H, jitter):
                                             jitter_scale_max=jitter_scale_max,
                                             jitter_offset=jitter_offset)
 
-            boxes, flags = annotation_to_h5(H,
-                                            anno,
-                                            H["grid_width"],
-                                            H["grid_height"],
-                                            H["rnn_len"])
+            boxes, flags = annotation_to_h5(H, anno)
 
             yield {"image": I, "boxes": boxes, "flags": flags}
 
@@ -84,8 +80,8 @@ def load_data_gen(H, phase, jitter):
         output = {}
 
         rnn_len = H["rnn_len"]
-        flags = d['flags'][0, :, 0, 0:rnn_len, 0]
-        boxes = np.transpose(d['boxes'][0, :, :, 0:rnn_len, 0], (0, 2, 1))
+        flags = d['flags']
+        boxes = d['boxes']
         assert(flags.shape == (grid_size, rnn_len))
         assert(boxes.shape == (grid_size, rnn_len, 4))
 

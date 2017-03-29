@@ -1,13 +1,12 @@
-import os
 import cv2
-import re
-import sys
-import argparse
 import numpy as np
 import copy
 import annolist.AnnotationLib as al
 
-def annotation_to_h5(H, a, cell_width, cell_height, max_len):
+def annotation_to_h5(H, a):
+    cell_width = H['grid_width']
+    cell_height = H['grid_height']
+    max_len = H['rnn_len']
     region_size = H['region_size']
     assert H['region_size'] == H['image_height'] / H['grid_height']
     assert H['region_size'] == H['image_width'] / H['grid_width']
@@ -20,8 +19,8 @@ def annotation_to_h5(H, a, cell_width, cell_height, max_len):
     for cidx, c in enumerate(cell_regions):
         box_list[cidx] = [r for r in a.rects if all(r.intersection(c))]
 
-    boxes = np.zeros((1, cells_per_image, 4, max_len, 1), dtype = np.float)
-    box_flags = np.zeros((1, cells_per_image, 1, max_len, 1), dtype = np.float)
+    boxes = np.zeros((cells_per_image, max_len, 4), dtype = np.float)
+    box_flags = np.zeros((cells_per_image, max_len), dtype = np.float)
 
     for cidx in xrange(cells_per_image):
         #assert(cur_num_boxes <= max_len)
@@ -44,8 +43,8 @@ def annotation_to_h5(H, a, cell_width, cell_height, max_len):
                 unsorted_boxes.append(np.array([ox, oy, width, height], dtype=np.float))
 
         for bidx, box in enumerate(sorted(unsorted_boxes, key=lambda x: x[0]**2 + x[1]**2)):
-            boxes[0, cidx, :, bidx, 0] = box
-            box_flags[0, cidx, 0, bidx, 0] = max(box_list[cidx][bidx].silhouetteID, 1)
+            boxes[cidx, bidx,  :] = box
+            box_flags[cidx, bidx] = max(box_list[cidx][bidx].silhouetteID, 1)
 
     return boxes, box_flags
 
