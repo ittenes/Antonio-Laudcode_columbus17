@@ -1,11 +1,12 @@
 class Rect(object):
-    def __init__(self, cx, cy, width, height, confidence):
+    def __init__(self, cx, cy, width, height, confidence,  classID):
         self.cx = cx
         self.cy = cy
         self.width = width
         self.height = height
         self.confidence = confidence
         self.true_confidence = confidence
+        self.classID = classID
     def overlaps(self, other):
         if abs(self.cx - other.cx) > (self.width + other.width) / 1.5:
             return False

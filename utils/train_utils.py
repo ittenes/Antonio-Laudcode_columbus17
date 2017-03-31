@@ -92,7 +92,6 @@ def load_data_gen(H, phase, jitter):
 
 def add_rectangles(H, orig_image, confidences, boxes, use_stitching=False, rnn_len=1, min_conf=0.1, show_removed=True, tau=0.25, show_suppressed=True):
     image = np.copy(orig_image[0])
-    num_cells = H["grid_height"] * H["grid_width"]
     boxes_r = np.reshape(boxes, (-1,
                                  H["grid_height"],
                                  H["grid_width"],
@@ -108,13 +107,14 @@ def add_rectangles(H, orig_image, confidences, boxes, use_stitching=False, rnn_l
     for n in range(rnn_len):
         for y in range(H["grid_height"]):
             for x in range(H["grid_width"]):
+                classID = np.argmax(confidences_r[0, y, x, n, 1:]) + 1
                 bbox = boxes_r[0, y, x, n, :]
                 abs_cx = int(bbox[0]) + cell_pix_size/2 + cell_pix_size * x
                 abs_cy = int(bbox[1]) + cell_pix_size/2 + cell_pix_size * y
                 w = bbox[2]
                 h = bbox[3]
-                conf = np.max(confidences_r[0, y, x, n, 1:])
-                all_rects[y][x].append(Rect(abs_cx,abs_cy,w,h,conf))
+                conf = confidences_r[0, y, x, n, classID]
+                all_rects[y][x].append(Rect(abs_cx, abs_cy, w, h, conf, classID))
 
     all_rects_r = [r for row in all_rects for cell in row for r in cell]
     if use_stitching:
@@ -146,6 +146,7 @@ def add_rectangles(H, orig_image, confidences, boxes, use_stitching=False, rnn_l
         r.y1 = rect.cy - rect.height/2.
         r.y2 = rect.cy + rect.height/2.
         r.score = rect.true_confidence
+        r.classID = rect.classID
         rects.append(r)
 
     return image, rects

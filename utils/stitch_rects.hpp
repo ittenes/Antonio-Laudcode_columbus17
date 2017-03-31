@@ -20,14 +20,16 @@ class Rect {
   int height_;
   float confidence_;
   float true_confidence_;
+  int classID_;
 
-  explicit Rect(int cx, int cy, int width, int height, float confidence) {
+  explicit Rect(int cx, int cy, int width, int height, float confidence, int classID) {
     cx_ = cx;
     cy_ = cy;
     width_ = width;
     height_ = height;
     confidence_ = confidence;
     true_confidence_ = confidence;
+    classID_ = classID;
   }
 
   Rect(const Rect& other) {
@@ -37,6 +39,7 @@ class Rect {
     height_ = other.height_;
     confidence_ = other.confidence_;
     true_confidence_ = other.true_confidence_;
+    classID_ = other.classID_;
   }
 
   bool overlaps(const Rect& other, float tau) const {
