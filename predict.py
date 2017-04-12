@@ -19,7 +19,7 @@ from utils.annolist import AnnotationLib as al
 from utils.train_utils import add_rectangles, rescale_boxes
 
 
-def initialize(weights_path, hypes_path, options):
+def initialize(weights_path, hypes_path, options=None):
     """Initialize prediction process.
      
     All long running operations like TensorFlow session start and weights loading are made here.
@@ -58,19 +58,19 @@ def initialize(weights_path, hypes_path, options):
     return {'sess': sess, 'pred_boxes': pred_boxes, 'pred_confidences': pred_confidences, 'x_in': x_in, 'hypes': H}
 
 
-def hot_predict(image_path, init_params, options):
+def hot_predict(image_path, init_params):
     """Makes predictions when all long running preparation operations are made. 
     
     Args:
         image_path (string): The path to the source image. 
         init_params (dict): The parameters produced by :func:`initialize`.
-        options (dict): The options for more precise prediction of bounding boxes.
 
     Returns (Annotation):
         The annotation for the source image.
     """
 
     H = init_params['hypes']
+    options = H['evaluate']  # The options for more precise prediction of bounding boxes.
 
     # predict
     orig_img = imread(image_path)[:, :, :3]
@@ -89,7 +89,7 @@ def hot_predict(image_path, init_params, options):
     return pred_anno
 
 
-def prepare_options(hypes_path, options):
+def prepare_options(hypes_path='hypes.json', options=None):
     """Sets parameters of the prediction process.
         
     Args:
@@ -100,9 +100,22 @@ def prepare_options(hypes_path, options):
         The model hyperparameters dictionary.
     """
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = str(options['gpu'])
     with open(hypes_path, 'r') as f:
         H = json.load(f)
+
+    # set default options values if they were not provided
+    if options is None:
+        if 'evaluate' in H:
+            options = H['evaluate']
+        else:
+            print ('Evaluate parameters were not found! You can provide them through hyperparameters json file '
+                   'or hot_predict options parameter.')
+            return None
+    else:
+        H['evaluate'] = options
+
+    os.environ['CUDA_VISIBLE_DEVICES'] = str(options['gpu'])
+
     return H
 
 
@@ -146,7 +159,7 @@ def main():
         return
 
     init_params = initialize(args[1], args[2], options.__dict__)
-    pred_anno = hot_predict(args[0], init_params, options.__dict__)
+    pred_anno = hot_predict(args[0], init_params)
     save_results(args[0], pred_anno)
 
 
