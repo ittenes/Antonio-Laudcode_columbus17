@@ -58,7 +58,7 @@ def initialize(weights_path, hypes_path, options=None):
     return {'sess': sess, 'pred_boxes': pred_boxes, 'pred_confidences': pred_confidences, 'x_in': x_in, 'hypes': H}
 
 
-def hot_predict(image_path, init_params):
+def hot_predict(image_path, init_params, to_json=True):
     """Makes predictions when all long running preparation operations are made. 
     
     Args:
@@ -86,7 +86,8 @@ def hot_predict(image_path, init_params):
     pred_anno.rects = [r for r in rects if r.x1 < r.x2 and r.y1 < r.y2]
     pred_anno.imagePath = os.path.abspath(image_path)
     pred_anno = rescale_boxes((H['image_height'], H['image_width']), pred_anno, orig_img.shape[0], orig_img.shape[1])
-    return pred_anno
+    result = [r.writeJSON() for r in pred_anno] if to_json else pred_anno
+    return result
 
 
 def prepare_options(hypes_path='hypes.json', options=None):
