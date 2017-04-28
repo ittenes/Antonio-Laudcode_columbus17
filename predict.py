@@ -134,7 +134,8 @@ def save_results(image_path, anno):
     # draw
     new_img = Image.open(image_path)
     d = ImageDraw.Draw(new_img)
-    for r in anno.rects:
+    rects = anno['rects'] if type(anno) is dict else anno.rects
+    for r in rects:
         d.rectangle([r.left(), r.top(), r.right(), r.bottom()], outline=(255, 0, 0))
 
     # save
@@ -143,7 +144,11 @@ def save_results(image_path, anno):
     subprocess.call(['chmod', '777', fpath])
 
     fpath = os.path.join(os.path.dirname(image_path), 'result.json')
-    al.saveJSON(fpath, anno)
+    if type(anno) is dict:
+        with open(fpath, 'w') as f:
+            json.dump(anno, f)
+    else:
+        al.saveJSON(fpath, anno)
     subprocess.call(['chmod', '777', fpath])
 
 
@@ -160,7 +165,7 @@ def main():
         return
 
     init_params = initialize(args[1], args[2], options.__dict__)
-    pred_anno = hot_predict(args[0], init_params)
+    pred_anno = hot_predict(args[0], init_params, False)
     save_results(args[0], pred_anno)
 
 
