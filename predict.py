@@ -81,12 +81,12 @@ def hot_predict(image_path, init_params, to_json=True):
     pred_anno.imageName = image_path
     _, rects = add_rectangles(H, [img], np_pred_confidences, np_pred_boxes, use_stitching=True,
                               rnn_len=H['rnn_len'], min_conf=options['min_conf'], tau=options['tau'],
-                              show_suppressed=options['show_suppressed'])
+                              show_suppressed=False)
 
     pred_anno.rects = [r for r in rects if r.x1 < r.x2 and r.y1 < r.y2]
     pred_anno.imagePath = os.path.abspath(image_path)
     pred_anno = rescale_boxes((H['image_height'], H['image_width']), pred_anno, orig_img.shape[0], orig_img.shape[1])
-    result = [r.writeJSON() for r in pred_anno] if to_json else pred_anno
+    result = [r.writeJSON() for r in pred_anno if r.score > options['min_conf']] if to_json else pred_anno
     return result
 
 
@@ -113,7 +113,8 @@ def prepare_options(hypes_path='hypes.json', options=None):
                    'or hot_predict options parameter.')
             return None
     else:
-        H['evaluate'] = options
+        for key, val in options.items():
+            H['evaluate'][key] = val
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(options['gpu'])
 
@@ -157,8 +158,7 @@ def main():
     parser.add_option('--gpu', action='store', type='int', default=0)
     parser.add_option('--tau', action='store', type='float',  default=0.25)
     parser.add_option('--min_conf', action='store', type='float', default=0.2)
-    parser.add_option('--show_suppressed', action='store_true', dest='show_suppressed', default=False)
-    
+
     (options, args) = parser.parse_args()
     if len(args) < 3:
         print ('Provide image, weights and hypes paths')
