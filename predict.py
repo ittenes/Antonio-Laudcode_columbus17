@@ -91,7 +91,8 @@ def hot_predict(image_path, init_params, to_json=True):
 
 
 def prepare_options(hypes_path='hypes.json', options=None):
-    """Sets parameters of the prediction process.
+    """Sets parameters of the prediction process. If evaluate options provided partially, it'll merge them. 
+    The priority is given to options argument to overwrite the same obtained from the hyperparameters file.
         
     Args:
         hypes_path (string): The path to model hyperparameters file.
@@ -115,11 +116,11 @@ def prepare_options(hypes_path='hypes.json', options=None):
     else:
         if 'evaluate' not in H:
             H['evaluate'] = {}
+        # merge options argument into evaluate options from hyperparameters file
         for key, val in options.items():
             H['evaluate'][key] = val
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(options['gpu'])
-
     return H
 
 
