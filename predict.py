@@ -113,6 +113,8 @@ def prepare_options(hypes_path='hypes.json', options=None):
                    'or hot_predict options parameter.')
             return None
     else:
+        if 'evaluate' not in H:
+            H['evaluate'] = {}
         for key, val in options.items():
             H['evaluate'][key] = val
 
