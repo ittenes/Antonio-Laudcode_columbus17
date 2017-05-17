@@ -58,25 +58,30 @@ def initialize(weights_path, hypes_path, options=None):
     return {'sess': sess, 'pred_boxes': pred_boxes, 'pred_confidences': pred_confidences, 'x_in': x_in, 'hypes': H}
 
 
-def hot_predict(image_path, init_params, to_json=True):
+def hot_predict(image_path, parameters, to_json=True):
     """Makes predictions when all long running preparation operations are made. 
     
     Args:
         image_path (string): The path to the source image. 
-        init_params (dict): The parameters produced by :func:`initialize`.
+        parameters (dict): The parameters produced by :func:`initialize`.
 
     Returns (Annotation):
         The annotation for the source image.
     """
 
-    H = init_params['hypes']
-    options = H['evaluate']  # The options for more precise prediction of bounding boxes.
+    H = parameters['hypes']
+    # The default options for prediction of bounding boxes.
+    options = H['evaluate']
+    if 'pred_options' in parameters:
+        # The new options for prediction of bounding boxes
+        for key, val in parameters['pred_options'].items():
+            options[key] = val
 
     # predict
     orig_img = imread(image_path)[:, :, :3]
     img = imresize(orig_img, (H['image_height'], H['image_width']), interp='cubic')
-    (np_pred_boxes, np_pred_confidences) = init_params['sess'].\
-        run([init_params['pred_boxes'], init_params['pred_confidences']], feed_dict={init_params['x_in']: img})
+    (np_pred_boxes, np_pred_confidences) = parameters['sess'].\
+        run([parameters['pred_boxes'], parameters['pred_confidences']], feed_dict={parameters['x_in']: img})
     pred_anno = al.Annotation()
     pred_anno.imageName = image_path
     _, rects = add_rectangles(H, [img], np_pred_confidences, np_pred_boxes, use_stitching=True,
@@ -120,7 +125,7 @@ def prepare_options(hypes_path='hypes.json', options=None):
         for key, val in options.items():
             H['evaluate'][key] = val
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = str(options['gpu'])
+    os.environ['CUDA_VISIBLE_DEVICES'] = str(H['evaluate']['gpu'])
     return H
 
 
