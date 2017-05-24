@@ -164,7 +164,7 @@ def save_results(image_path, anno):
 def main():
     parser = OptionParser(usage='usage: %prog [options] <image> <weights> <hypes>')
     parser.add_option('--gpu', action='store', type='int', default=0)
-    parser.add_option('--tau', action='store', type='float',  default=0.25)
+    parser.add_option('--tau', action='store', type='float', default=0.25)
     parser.add_option('--min_conf', action='store', type='float', default=0.2)
 
     (options, args) = parser.parse_args()
