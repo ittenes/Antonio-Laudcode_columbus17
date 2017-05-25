@@ -2,6 +2,10 @@ import cv2
 import numpy as np
 import copy
 import annolist.AnnotationLib as al
+from imgaug import augmenters as iaa
+import imgaug as ia
+from scipy.ndimage.interpolation import rotate as imrotate
+
 
 def annotation_to_h5(H, a):
     cell_width = H['grid_width']
@@ -52,6 +56,7 @@ def annotation_to_h5(H, a):
 
     return boxes, box_flags
 
+
 def get_cell_grid(cell_width, cell_height, region_size):
 
     cell_regions = []
@@ -69,6 +74,7 @@ def get_cell_grid(cell_width, cell_height, region_size):
 
 
     return cell_regions
+
 
 def annotation_jitter(I, a_in, min_box_width=20, jitter_scale_min=0.9, jitter_scale_max=1.1, jitter_offset=16, target_width=640, target_height=480):
     a = copy.deepcopy(a_in)
@@ -177,3 +183,80 @@ def annotation_jitter(I, a_in, min_box_width=20, jitter_scale_min=0.9, jitter_sc
     a.rects = new_rects
 
     return I2, a
+
+
+class Augmentations(object):
+    """
+    The class is intended to organise augmentation processes.
+    """
+    def __init__(self, hypes, process_type):
+        """Constructs instance of augmentations pipeline.
+        Args:
+            hypes (dict): Defines which augmentations to use.
+            process_type (string): Defines the process type we wish to apply augmentations.
+             Could be one of the following: train, predict_pre, predict_post.
+        """
+        # transforms factory
+        transforms = {
+            'rotate90': {'train': iaa.Affine(rotate=(90, 90))},
+            'flip_lr': {'train': iaa.Fliplr(0.5)},
+            'blur': {'train': iaa.GaussianBlur(sigma=(0, 3.0))}
+        }
+
+        # build pipeline using chosen transforms
+        self.pipeline = []
+        for hype, val in hypes.items():
+            if hype in transforms and process_type in transforms[hype]:
+                self.pipeline.append(transforms[hype][process_type])
+
+    def process(self, image, rects):
+        """Applies augmentation pipeline to images and bounding boxes.
+        Args:
+            image (object): The target image to rotate.
+            rects (list): List of bounding boxes.
+        Returns (tuple):
+            Augmented images and bounding boxes
+        """
+        # rects -> keypoints
+        keypoints = np.array(rects).reshape((-1, 2))
+        keypoints = [ia.Keypoint(kp[0], kp[1]) for kp in keypoints]
+
+        # transform images and keypoints
+        seq = iaa.Sequential(self.pipeline)
+        seq_det = seq.to_deterministic()
+        images_aug = seq_det.augment_images([image])
+        keypoints_aug = np.array(seq_det.augment_keypoints(keypoints)).reshape((-1, 2))
+
+        # keypoints -> rects
+        rects = [[min(k_pair[0].x, k_pair[1].x), min(k_pair[0].y, k_pair[1].y),
+                  max(k_pair[0].x, k_pair[1].x), max(k_pair[0].y, k_pair[1].y)] for k_pair in keypoints_aug]
+        return images_aug, rects
+
+
+class Rotate90(object):
+    @staticmethod
+    def do(image, anno=None):
+        """
+        Does the rotation for image and rectangles for 90 degrees counterclockwise.
+        Args:
+            image (Image): The target image to rotate.
+            anno (Annotation): The annotations to be rotated with the image.
+        Returns (tuple):
+            Rotated image and annotations for it.
+        """
+        w = image.shape[1]
+        new_image = imrotate(image, 90, reshape=True)
+        if anno is not None:
+            anno.rects = [al.AnnoRect(r.y1, w - r.x2, r.y2, w - r.x1) for r in anno.rects]
+        return new_image, anno
+
+    @staticmethod
+    def invert(width, rects):
+        """Inverts the rotation for 90 degrees.
+        Args:
+            width (int): width of rotated image.
+            rects (list): The list of rectangles on rotated image.
+        Returns (list):
+            The list of annotations for original image.
+        """
+        return [al.AnnoRect(width - r.y2, r.x1, width - r.y1, r.x2) for r in rects]

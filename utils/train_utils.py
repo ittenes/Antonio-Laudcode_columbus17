@@ -6,23 +6,40 @@ import itertools
 from scipy.misc import imread, imresize
 import tensorflow as tf
 
-from data_utils import (annotation_jitter, annotation_to_h5)
+from data_utils import annotation_jitter, annotation_to_h5, Rotate90
 from utils.annolist import AnnotationLib as al
 from rect import Rect
 from utils import tf_concat
+
+
+def preprocess_image(anno, H):
+    image = imread(anno.imageName)
+    # skip greyscale images
+    if len(image.shape) < 3:
+        return []
+
+    if 'rotate' in H:
+        image, anno = Rotate90.do(image, anno)
+    res = [(image, anno)]
+    return res
 
 
 def rescale_boxes(current_shape, anno, target_height, target_width):
     x_scale = target_width / float(current_shape[1])
     y_scale = target_height / float(current_shape[0])
     for r in anno.rects:
-        assert r.x1 < r.x2  # one of the annotations has negative width!
+        if r.x1 == r.x2 or r.y1 == r.y2:
+            continue
+        # one of the annotations has negative width!
+        assert r.x1 < r.x2, 'Bad rect: %d %d %d %d in %s' % (r.x1, r.y1, r.x2, r.y2, anno.imageName)
         r.x1 *= x_scale
         r.x2 *= x_scale
-        assert r.y1 < r.y2  # one of the annotations has negative height!
+        # one of the annotations has negative height!
+        assert r.y1 < r.y2, 'Bad rect: %d %d %d %d in %s' % (r.x1, r.y1, r.x2, r.y2, anno.imageName)
         r.y1 *= y_scale
         r.y2 *= y_scale
     return anno
+
 
 def load_idl_tf(idlfile, H, jitter):
     """Take the idlfile and net configuration and create a generator
@@ -36,35 +53,35 @@ def load_idl_tf(idlfile, H, jitter):
             os.path.dirname(os.path.realpath(idlfile)), anno.imageName)
         annos.append(anno)
     random.seed(0)
+
     if H['data']['truncate_data']:
         annos = annos[:10]
     for epoch in itertools.count():
         random.shuffle(annos)
-        for anno in annos:
-            I = imread(anno.imageName)
-            #Skip Greyscale images
-            if len(I.shape) < 3:
-                continue
-            if I.shape[2] == 4:
-                I = I[:, :, :3]
-            if I.shape[0] != H["image_height"] or I.shape[1] != H["image_width"]:
-                if epoch == 0:
+        for origin_anno in annos:
+            tiles = preprocess_image(origin_anno, H)
+            for I, anno in tiles:
+                if I.shape[2] == 4:
+                    I = I[:, :, :3]
+                if I.shape[0] != H["image_height"] or I.shape[1] != H["image_width"]:
+                    # if epoch == 0:
                     anno = rescale_boxes(I.shape, anno, H["image_height"], H["image_width"])
-                I = imresize(I, (H["image_height"], H["image_width"]), interp='cubic')
-            if jitter:
-                jitter_scale_min=0.9
-                jitter_scale_max=1.1
-                jitter_offset=16
-                I, anno = annotation_jitter(I,
-                                            anno, target_width=H["image_width"],
-                                            target_height=H["image_height"],
-                                            jitter_scale_min=jitter_scale_min,
-                                            jitter_scale_max=jitter_scale_max,
-                                            jitter_offset=jitter_offset)
+                    I = imresize(I, (H["image_height"], H["image_width"]), interp='cubic')
+                    # draw_boxes(I, anno)
+                if jitter:
+                    jitter_scale_min=0.9
+                    jitter_scale_max=1.1
+                    jitter_offset=16
+                    I, anno = annotation_jitter(I,
+                                                anno, target_width=H["image_width"],
+                                                target_height=H["image_height"],
+                                                jitter_scale_min=jitter_scale_min,
+                                                jitter_scale_max=jitter_scale_max,
+                                                jitter_offset=jitter_offset)
 
-            boxes, flags = annotation_to_h5(H, anno)
+                boxes, flags = annotation_to_h5(H, anno)
 
-            yield {"image": I, "boxes": boxes, "flags": flags}
+                yield {"image": I, "boxes": boxes, "flags": flags}
 
 def make_sparse(n, d):
     v = np.zeros((d,), dtype=np.float32)
@@ -116,14 +133,12 @@ def add_rectangles(H, orig_image, confidences, boxes, use_stitching=False, rnn_l
                 h = bbox[3]
                 conf = confidences_r[0, y, x, n, classID]
                 all_rects[y][x].append(Rect(abs_cx, abs_cy, w, h, conf, classID))
-
     all_rects_r = [r for row in all_rects for cell in row for r in cell]
     if use_stitching:
         from stitch_wrapper import stitch_rects
         acc_rects = stitch_rects(all_rects, tau)
     else:
         acc_rects = all_rects_r
-
 
     if show_suppressed:
         pairs = [(all_rects_r, (255, 0, 0))]
