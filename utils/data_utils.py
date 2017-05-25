@@ -189,7 +189,7 @@ class Augmentations(object):
     """
     The class is intended to organise augmentation processes.
     """
-    def __init__(self, hypes, process_type):
+    def __init__(self, hypes):
         """Constructs instance of augmentations pipeline.
         Args:
             hypes (dict): Defines which augmentations to use.
@@ -198,16 +198,16 @@ class Augmentations(object):
         """
         # transforms factory
         transforms = {
-            'rotate90': {'train': iaa.Affine(rotate=(90, 90))},
-            'flip_lr': {'train': iaa.Fliplr(0.5)},
-            'blur': {'train': iaa.GaussianBlur(sigma=(0, 3.0))}
+            'rotate': iaa.Affine(rotate=(-5, 5)),
+            'flip_lr': iaa.Fliplr(0.5),
+            'blur': iaa.GaussianBlur(sigma=(0, 3.0))
         }
 
         # build pipeline using chosen transforms
         self.pipeline = []
         for hype, val in hypes.items():
-            if hype in transforms and process_type in transforms[hype]:
-                self.pipeline.append(transforms[hype][process_type])
+            if hype in transforms and transforms[hype]:
+                self.pipeline.append(transforms[hype])
 
     def process(self, image, rects):
         """Applies augmentation pipeline to images and bounding boxes.

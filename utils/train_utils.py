@@ -6,7 +6,7 @@ import itertools
 from scipy.misc import imread, imresize
 import tensorflow as tf
 
-from data_utils import annotation_jitter, annotation_to_h5, Rotate90
+from data_utils import annotation_jitter, annotation_to_h5, Rotate90, Augmentations
 from utils.annolist import AnnotationLib as al
 from rect import Rect
 from utils import tf_concat
@@ -18,10 +18,16 @@ def preprocess_image(anno, H):
     if len(image.shape) < 3:
         return []
 
-    if 'rotate' in H:
+    if 'rotate90' in H['data'] and H['data']['rotate90']:
         image, anno = Rotate90.do(image, anno)
-    res = [(image, anno)]
-    return res
+    result = [(image, anno)]
+    if 'augmentations' in H['data']:
+        new_res = []
+        for i, a in result:
+            augmented = Augmentations(H['data']).process(i, a)
+            new_res.append(augmented)
+        result = new_res
+    return result
 
 
 def rescale_boxes(current_shape, anno, target_height, target_width):
