@@ -90,6 +90,10 @@ For example, the following is a screenshot of a Tensorboard comparing two differ
     
 <img src=http://russellsstewart.com/s/tensorbox/tensorboard_loss.png></img>
 
+## Annotation data formats
+
+[Desription](utils/annolist/readme.md) is provided in corresponding folder.
+
 ## Community
 
 If you're new to object detection, and want to chat with other people that are working on similar problems, check out the community chat at https://gitter.im/Russell91/TensorBox, especially on Saturdays.
