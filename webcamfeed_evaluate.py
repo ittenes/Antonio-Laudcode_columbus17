@@ -207,6 +207,38 @@ def save_results(image_path, anno):
     subprocess.call(['chmod', '777', fpath])
 
 
+def save_results_but_not_image(image_path, anno):
+    """Saves results of the prediction.
+
+    Args:
+        image_path (string): The path to source image to predict bounding boxes.
+        anno (Annotation): The predicted annotations for source image.
+
+    Returns:
+        Nothing.
+    """
+
+    # draw
+    '''new_img = Image.open(image_path)
+    d = ImageDraw.Draw(new_img)
+    rects = anno['rects'] if type(anno) is dict else anno.rects
+    for r in rects:
+        d.rectangle([r.left(), r.top(), r.right(), r.bottom()], outline=(255, 0, 0))
+
+    # save
+    fpath = os.path.join(os.path.dirname(image_path), 'result.png')
+    new_img.save(fpath)
+    subprocess.call(['chmod', '777', fpath])
+'''
+
+    fpath = os.path.join(os.path.dirname(image_path), 'result.json')
+    if type(anno) is dict:
+        with open(fpath, 'w') as f:
+            json.dump(anno, f)
+    else:
+        al.saveJSON(fpath, anno)
+    subprocess.call(['chmod', '777', fpath])
+
 def main():
     parser = OptionParser(usage='usage: %prog [options] <image> <weights> <hypes>')
     parser.add_option('--gpu', action='store', type='int', default=0)
@@ -233,20 +265,12 @@ def main():
 
         retval, image = vidcap.retrieve()
         crop_img = image[0:512, 0:512]
-        cv2.imwrite("test.png", image)
 
         pred_anno = hot_predict_img(image, init_params, False)
 
-        save_results(args[0], pred_anno)
-        # image = cv2.imread("results.png", 1)
-        # cv2.imshow(test, image)
-        bashCommand = "killall Preview"
-        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-        output, error = process.communicate()
-
-        bashCommand = "open result.png"
-        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-        output, error = process.communicate()
+        rects = pred_anno['rects'] if type(anno) is dict else anno.rects
+        for r in rects:
+            print(r.left(), r.top(), r.right(), r.bottom())
 
 
         vidcap.release()
