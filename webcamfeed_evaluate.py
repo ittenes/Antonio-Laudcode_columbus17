@@ -257,23 +257,21 @@ def main():
 
     vidcap = cv2.VideoCapture()
 
-
-    #cv2.namedWindow("test", 1)
-
+    #cv2.namedWindow("t est", 1)
+    count = 0
     for i in range(25*20):
         vidcap.open(0)
-
         retval, image = vidcap.retrieve()
+        vidcap.release()
         crop_img = image[0:512, 0:512]
 
         pred_anno = hot_predict_img(crop_img, init_params, False)
-
+        print("---", i);
         rects = pred_anno['rects'] if type(pred_anno) is dict else pred_anno.rects
         for r in rects:
             print(r.left(), r.top(), r.right(), r.bottom())
 
 
-        vidcap.release()
 
 if __name__ == '__main__':
     main()
