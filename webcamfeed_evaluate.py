@@ -189,9 +189,37 @@ def main():
         return
 
     init_params = initialize(args[1], args[2], options.__dict__)
-    pred_anno = hot_predict(args[0], init_params, False)
-    save_results(args[0], pred_anno)
 
+    import cv2
+    import subprocess
+
+    vidcap = cv2.VideoCapture()
+
+
+    #cv2.namedWindow("test", 1)
+
+    for i in range(25*20):
+        vidcap.open(1)
+
+        retval, image = vidcap.retrieve()
+        crop_img = image[0:512, 0:512]
+        cv2.imwrite("test.png", image)
+
+        pred_anno = hot_predict("test.png", init_params, False)
+
+        save_results(args[0], pred_anno)
+        # image = cv2.imread("results.png", 1)
+        # cv2.imshow(test, image)
+        bashCommand = "killall Preview"
+        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+
+        bashCommand = "open result.png"
+        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+
+
+        vidcap.release()
 
 if __name__ == '__main__':
     main()

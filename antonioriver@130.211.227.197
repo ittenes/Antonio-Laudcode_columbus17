@@ -189,7 +189,11 @@ def main():
         return
 
     init_params = initialize(args[1], args[2], options.__dict__)
-    pred_anno = hot_predict(args[0], init_params, False)
+
+    for i in range(25*20):
+        pred_anno = hot_predict(args[0], init_params, False)
+
+
     save_results(args[0], pred_anno)
 
 
