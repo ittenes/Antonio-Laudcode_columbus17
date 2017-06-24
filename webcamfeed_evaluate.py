@@ -199,11 +199,11 @@ def main():
     #cv2.namedWindow("test", 1)
 
     for i in range(25*20):
-        vidcap.open(1)
+        vidcap.open(0)
 
         retval, image = vidcap.retrieve()
         crop_img = image[0:512, 0:512]
-        cv2.imwrite("test.png", image)
+        cv2.imwrite("test.png", crop_img)
 
         pred_anno = hot_predict("test.png", init_params, False)
 
