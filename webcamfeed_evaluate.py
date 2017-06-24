@@ -92,11 +92,41 @@ def hot_predict(image_path, parameters, to_json=True):
     result = [r.writeJSON() for r in pred_anno] if to_json else pred_anno
     return result
 
+def hot_predict_img(image, parameters, to_json=True):
+    """Makes predictions when all long running preparation operations are made.
+
+    Args:
+        image_path (string): The path to the source image.
+        parameters (dict): The parameters produced by :func:`initialize`.
+
+    Returns (Annotation):
+        The annotation for the source image.
+    """
+
+    H = parameters['hypes']
+    # The default options for prediction of bounding boxes.
+    options = H['evaluate']
+    if 'pred_options' in parameters:
+        # The new options for prediction of bounding boxes
+        for key, val in parameters['pred_options'].items():
+            options[key] = val
+
+    # predict
+    orig_img = (image)[:, :, :3]
+    img = Rotate90.do(orig_img) if 'rotate90' in H['data'] and H['data']['rotate90'] else orig_img
+    img = imresize(img, (512, 512), interp='cubic')
+    np_pred_boxes, np_pred_confidences = parameters['sess']. \
+        run([parameters['pred_boxes'], parameters['pred_confidences']], feed_dict={parameters['x_in']: img})
+
+    image_info = { 'original': orig_img, 'transformed': img}
+    pred_anno = postprocess(image_info, np_pred_boxes, np_pred_confidences, H, options)
+    result = [r.writeJSON() for r in pred_anno] if to_json else pred_anno
+    return result
 
 def postprocess(image_info, np_pred_boxes, np_pred_confidences, H, options):
     pred_anno = al.Annotation()
-    pred_anno.imageName = image_info['path']
-    pred_anno.imagePath = os.path.abspath(image_info['path'])
+    #pred_anno.imageName = image_info['path']
+    #pred_anno.imagePath = os.path.abspath(image_info['path'])
     _, rects = add_rectangles(H, [image_info['transformed']], np_pred_confidences, np_pred_boxes, use_stitching=True,
                               rnn_len=H['rnn_len'], min_conf=options['min_conf'], tau=options['tau'],
                               show_suppressed=False)
@@ -205,7 +235,7 @@ def main():
         crop_img = image[0:512, 0:512]
         cv2.imwrite("test.png", image)
 
-        pred_anno = hot_predict("test.png", init_params, False)
+        pred_anno = hot_predict_img(image, init_params, False)
 
         save_results(args[0], pred_anno)
         # image = cv2.imread("results.png", 1)
