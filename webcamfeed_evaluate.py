@@ -265,14 +265,8 @@ def main():
 
         retval, image = vidcap.retrieve()
         crop_img = image[0:512, 0:512]
-<<<<<<< HEAD
-=======
-        cv2.imwrite("test.png", crop_img)
 
-        pred_anno = hot_predict("test.png", init_params, False)
->>>>>>> working
-
-        pred_anno = hot_predict_img(image, init_params, False)
+        pred_anno = hot_predict_img(crop_img, init_params, False)
 
         rects = pred_anno['rects'] if type(anno) is dict else anno.rects
         for r in rects:
