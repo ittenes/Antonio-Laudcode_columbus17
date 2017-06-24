@@ -268,7 +268,7 @@ def main():
 
         pred_anno = hot_predict_img(crop_img, init_params, False)
 
-        rects = pred_anno['rects'] if type(anno) is dict else anno.rects
+        rects = pred_anno['rects'] if type(pred_anno) is dict else pred_anno.rects
         for r in rects:
             print(r.left(), r.top(), r.right(), r.bottom())
 
