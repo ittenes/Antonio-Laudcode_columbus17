@@ -261,9 +261,14 @@ def main():
     count = 0
     for i in range(25*20):
         vidcap.open(0)
+        #cv2.VideoCapture.set(vidcap, 4, 512)
+        #cv2.VideoCapture.set(vidcap, 3, 512)
+        vidcap.set(4, 512)
+        vidcap.set(3, 512)
+
         retval, image = vidcap.retrieve()
         vidcap.release()
-        crop_img = image[0:512, 0:512]
+        crop_img = image#[0:512, 0:512]
 
         pred_anno = hot_predict_img(crop_img, init_params, False)
         print("---", i);
