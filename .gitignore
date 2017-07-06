@@ -1,4 +1,4 @@
-*.pyc
+git*.pyc
 data/*
 output/*
 *.swp
