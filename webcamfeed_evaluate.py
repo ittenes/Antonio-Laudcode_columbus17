@@ -20,6 +20,8 @@ from utils.annolist import AnnotationLib as al
 from utils.train_utils import add_rectangles, rescale_boxes
 from utils.data_utils import Rotate90
 
+import Tkinter
+from PIL import Image, ImageTk
 
 def initialize(weights_path, hypes_path, options=None):
     """Initialize prediction process.
@@ -254,11 +256,19 @@ def main():
 
     import cv2
     import subprocess
+    #vidcap = cv2.VideoCapture()
 
-    vidcap = cv2.VideoCapture()
+    #cv2.namedWindow("test", 1)
+    # count = 0
+    # root = Tk()
+    # canvas = Canvas(width=800, height=800,bg='yellow')
+    # canvas.pack(expand = YES, fill=BOTH)
 
-    #cv2.namedWindow("t est", 1)
-    count = 0
+
+    # gif1=PhotoImage(file='./marbles.gif')
+    # canvas.create_image(50, 10, image=gif1, anchor = NW)
+    # root.update()
+    '''
     for i in range(25*20):
         vidcap.open(0)
         #cv2.VideoCapture.set(vidcap, 4, 512)
@@ -268,14 +278,64 @@ def main():
 
         retval, image = vidcap.retrieve()
         vidcap.release()
-        crop_img = image#[0:512, 0:512]
+        crop_img = image
+
+        b,g,r = cv2.split(image)
+        img2 = cv2.merge((r,g,b))
+        im = Image.fromarray(img2)
+        converted = ImageTk.PhotoImage(image=im)
+        canvas.create_image(50, 10, image=converted, anchor = NW)
+        root.update()
 
         pred_anno = hot_predict_img(crop_img, init_params, False)
         print("---", i);
         rects = pred_anno['rects'] if type(pred_anno) is dict else pred_anno.rects
         for r in rects:
             print(r.left(), r.top(), r.right(), r.bottom())
+    '''
 
+    # A root window for displaying objects
+    root = Tkinter.Tk()
+
+    # Convert the Image object into a TkPhoto object
+
+    canvas = Tkinter.Canvas(root, width=512, height=512)
+    canvas.pack()
+
+    canvas.create_line(0, 0, 200, 100)
+    canvas.create_line(0, 100, 200, 0, fill="red", dash=(4, 4))
+
+    canvas.create_rectangle(50, 25, 150, 75, fill="blue")
+
+
+    cap = cv2.VideoCapture(0)
+    if cap.isOpened() == 0:
+       cap.open(0)
+       cap.set(4, 512)
+       cap.set(3, 512)
+    while(True):
+        ret, frame = cap.read()
+
+        #time.sleep(1/25)
+        b,g,r = cv2.split(frame)
+        img2 = cv2.merge((r,g,b))
+        im = Image.fromarray(img2)
+        converted = ImageTk.PhotoImage(image=im)
+
+        canvas.create_image(0, 0, image=converted)
+
+        pred_anno = hot_predict_img(frame, init_params, False)
+        print("---");
+        rects = pred_anno['rects'] if type(pred_anno) is dict else pred_anno.rects
+        for r in rects:
+            print(r.left(), r.top(), r.right(), r.bottom())
+        root.update() # Start the GUI
+
+
+
+    # time.sleep(30)
+    #cap.release()
+    #cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
