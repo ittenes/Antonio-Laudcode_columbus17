@@ -220,19 +220,6 @@ def save_results_but_not_image(image_path, anno):
         Nothing.
     """
 
-    # draw
-    '''new_img = Image.open(image_path)
-    d = ImageDraw.Draw(new_img)
-    rects = anno['rects'] if type(anno) is dict else anno.rects
-    for r in rects:
-        d.rectangle([r.left(), r.top(), r.right(), r.bottom()], outline=(255, 0, 0))
-
-    # save
-    fpath = os.path.join(os.path.dirname(image_path), 'result.png')
-    new_img.save(fpath)
-    subprocess.call(['chmod', '777', fpath])
-'''
-
     fpath = os.path.join(os.path.dirname(image_path), 'result.json')
     if type(anno) is dict:
         with open(fpath, 'w') as f:
@@ -256,43 +243,6 @@ def main():
 
     import cv2
     import subprocess
-    #vidcap = cv2.VideoCapture()
-
-    #cv2.namedWindow("test", 1)
-    # count = 0
-    # root = Tk()
-    # canvas = Canvas(width=800, height=800,bg='yellow')
-    # canvas.pack(expand = YES, fill=BOTH)
-
-
-    # gif1=PhotoImage(file='./marbles.gif')
-    # canvas.create_image(50, 10, image=gif1, anchor = NW)
-    # root.update()
-    '''
-    for i in range(25*20):
-        vidcap.open(0)
-        #cv2.VideoCapture.set(vidcap, 4, 512)
-        #cv2.VideoCapture.set(vidcap, 3, 512)
-        vidcap.set(4, 512)
-        vidcap.set(3, 512)
-
-        retval, image = vidcap.retrieve()
-        vidcap.release()
-        crop_img = image
-
-        b,g,r = cv2.split(image)
-        img2 = cv2.merge((r,g,b))
-        im = Image.fromarray(img2)
-        converted = ImageTk.PhotoImage(image=im)
-        canvas.create_image(50, 10, image=converted, anchor = NW)
-        root.update()
-
-        pred_anno = hot_predict_img(crop_img, init_params, False)
-        print("---", i);
-        rects = pred_anno['rects'] if type(pred_anno) is dict else pred_anno.rects
-        for r in rects:
-            print(r.left(), r.top(), r.right(), r.bottom())
-    '''
 
     # A root window for displaying objects
     root = Tkinter.Tk()
@@ -311,11 +261,11 @@ def main():
     cap = cv2.VideoCapture(0)
     if cap.isOpened() == 0:
        cap.open(0)
-       cap.set(4, 512)
-       cap.set(3, 512)
+#       cap.set(4, 512)
+#       cap.set(3, 512)
     while(True):
         ret, frame = cap.read()
-
+        frame = frame[0:512, 0:512]
         #time.sleep(1/25)
         b,g,r = cv2.split(frame)
         img2 = cv2.merge((r,g,b))
@@ -325,6 +275,7 @@ def main():
         canvas.create_image(0, 0, image=converted)
 
         pred_anno = hot_predict_img(frame, init_params, False)
+
         print("---");
         rects = pred_anno['rects'] if type(pred_anno) is dict else pred_anno.rects
         for r in rects:
