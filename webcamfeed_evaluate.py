@@ -305,7 +305,7 @@ def main():
     canvas.create_line(0, 0, 200, 100)
     canvas.create_line(0, 100, 200, 0, fill="red", dash=(4, 4))
 
-    canvas.create_rectangle(50, 25, 150, 75, fill="blue")
+
 
 
     cap = cv2.VideoCapture(0)
@@ -329,6 +329,7 @@ def main():
         rects = pred_anno['rects'] if type(pred_anno) is dict else pred_anno.rects
         for r in rects:
             print(r.left(), r.top(), r.right(), r.bottom())
+            canvas.create_rectangle(int(r.left()), int(r.top()), int(r.right()), int(r.bottom()), fill="blue")
         root.update() # Start the GUI
 
 
