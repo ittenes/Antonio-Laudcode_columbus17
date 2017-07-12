@@ -1,0 +1,140 @@
+[
+  {
+    "image_path": "/Users/antonio.rivera/anaconda/envs/roman_tb/TensorBox/data/paloma/cub/11780.jpg", 
+    "rects": [
+      {
+        "classID": 1, 
+        "score": 0.312510222196579, 
+        "x1": 255.0, 
+        "x2": 265.0, 
+        "y1": 136.0, 
+        "y2": 146.0
+      }
+    ]
+  }, 
+  {
+    "image_path": "/Users/antonio.rivera/anaconda/envs/roman_tb/TensorBox/data/paloma/cub/11781.jpg", 
+    "rects": [
+      {
+        "classID": 1, 
+        "score": 0.28876355290412903, 
+        "x1": 274.5, 
+        "x2": 283.5, 
+        "y1": 106.5, 
+        "y2": 115.5
+      }
+    ]
+  }, 
+  {
+    "image_path": "/Users/antonio.rivera/anaconda/envs/roman_tb/TensorBox/data/paloma/cub/11782.jpg", 
+    "rects": [
+      {
+        "classID": 1, 
+        "score": 0.27559182047843933, 
+        "x1": 240.5, 
+        "x2": 249.5, 
+        "y1": 135.0, 
+        "y2": 145.0
+      }
+    ]
+  }, 
+  {
+    "image_path": "/Users/antonio.rivera/anaconda/envs/roman_tb/TensorBox/data/paloma/cub/11783.jpg", 
+    "rects": [
+      {
+        "classID": 1, 
+        "score": 0.29997241497039795, 
+        "x1": 286.0, 
+        "x2": 296.0, 
+        "y1": 79.0, 
+        "y2": 89.0
+      }
+    ]
+  }, 
+  {
+    "image_path": "/Users/antonio.rivera/anaconda/envs/roman_tb/TensorBox/data/paloma/cub/11784.jpg", 
+    "rects": [
+      {
+        "classID": 1, 
+        "score": 0.3060189187526703, 
+        "x1": 139.5, 
+        "x2": 148.5, 
+        "y1": 108.0, 
+        "y2": 118.0
+      }
+    ]
+  }, 
+  {
+    "image_path": "/Users/antonio.rivera/anaconda/envs/roman_tb/TensorBox/data/paloma/cub/11785.jpg", 
+    "rects": [
+      {
+        "classID": 1, 
+        "score": 0.3373890221118927, 
+        "x1": 203.5, 
+        "x2": 212.5, 
+        "y1": 82.5, 
+        "y2": 91.5
+      }
+    ]
+  }, 
+  {
+    "image_path": "/Users/antonio.rivera/anaconda/envs/roman_tb/TensorBox/data/paloma/cub/11786.jpg", 
+    "rects": [
+      {
+        "classID": 1, 
+        "score": 0.289566308259964, 
+        "x1": 234.5, 
+        "x2": 243.5, 
+        "y1": 134.5, 
+        "y2": 143.5
+      }
+    ]
+  }, 
+  {
+    "image_path": "/Users/antonio.rivera/anaconda/envs/roman_tb/TensorBox/data/paloma/cub/11787.jpg", 
+    "rects": [
+      {
+        "classID": 1, 
+        "score": 0.3090171813964844, 
+        "x1": 324.0, 
+        "x2": 334.0, 
+        "y1": 75.0, 
+        "y2": 85.0
+      }
+    ]
+  }, 
+  {
+    "image_path": "/Users/antonio.rivera/anaconda/envs/roman_tb/TensorBox/data/paloma/cub/11788.jpg", 
+    "rects": [
+      {
+        "classID": 1, 
+        "score": 0.30951204895973206, 
+        "x1": 134.5, 
+        "x2": 143.5, 
+        "y1": 129.0, 
+        "y2": 139.0
+      }
+    ]
+  }, 
+  {
+    "image_path": "/Users/antonio.rivera/anaconda/envs/roman_tb/TensorBox/data/paloma/pDificil.png", 
+    "rects": [
+      {
+        "classID": 1, 
+        "score": 0.12232214212417603, 
+        "x1": 364.0, 
+        "x2": 374.0, 
+        "y1": 271.5, 
+        "y2": 280.5
+      }, 
+      {
+        "classID": 1, 
+        "score": 0.032505884766578674, 
+        "x1": 392.5, 
+        "x2": 401.5, 
+        "y1": 262.5, 
+        "y2": 271.5
+      }
+    ]
+  }
+]
