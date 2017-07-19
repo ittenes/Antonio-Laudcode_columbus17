@@ -22,6 +22,46 @@ from utils.data_utils import Rotate90
 
 import Tkinter
 from PIL import Image, ImageTk
+import cv2
+import subprocess
+
+class Displayer:
+    ison = True
+
+    def __init__(self,ison):
+        self.ison = ison
+        #if self.ison:
+            # A root window for displaying objects
+        self.root = Tkinter.Tk()
+            # Convert the Image object into a TkPhoto object
+        self.canvas = Tkinter.Canvas(self.root, height=2000, width=2500, bd=0, highlightthickness=0, relief='ridge')
+        self.canvas.pack()
+
+    def showifison(self, frame):
+        #if self.ison:
+        print('hola');
+
+        cv2.imwrite("outCV233333333333333333.jpg",frame)
+        b,g,r = cv2.split(frame)
+        img2 = cv2.merge((r,g,b))
+        im = Image.fromarray(img2)
+        converted = ImageTk.PhotoImage(image=im)
+
+        print('hola2');
+        converted.save("tkresult333333333333.png")
+        self.canvas.create_image(0, 0, image=converted, anchor=Tkinter.NW)
+
+        print('hola3');
+
+    def drawrectanglesifison(self,rects):
+        if self.ison:
+            for r in rects:
+                self.canvas.create_rectangle(int(r.left()), int(r.top()), int(r.right()), int(r.bottom()), fill="blue")
+
+    def enddrawingifison(self):
+    #    if self.ison:
+        self.root.update()
+
 
 def initialize(weights_path, hypes_path, options=None):
     """Initialize prediction process.
@@ -241,41 +281,26 @@ def main():
 
     init_params = initialize(args[1], args[2], options.__dict__)
 
-    import cv2
-    import subprocess
+    displayer = Displayer(True)
 
-    # A root window for displaying objects
-    root = Tkinter.Tk()
-
-    # Convert the Image object into a TkPhoto object
-
-    canvas = Tkinter.Canvas(root, height=2000, width=2500, bd=0, highlightthickness=0, relief='ridge')
-    canvas.pack()
-
+    # webcam
     cap = cv2.VideoCapture(0)
     if cap.isOpened() == 0:
        cap.open(0)
 
     while(True):
+        # webcam
         ret, frame = cap.read()
-        frame = frame#[0:512, 0:512]
-        #cv2.imwrite("cvresult.png", frame)
-        b,g,r = cv2.split(frame)
-        img2 = cv2.merge((r,g,b))
-        im = Image.fromarray(img2)
-        converted = ImageTk.PhotoImage(image=im)
-        #im.save("tkresult.png")
-        canvas.create_image(0, 0, image=converted, anchor=Tkinter.NW)
-
+        displayer.showifison(frame)
+        # IA
         pred_anno = hot_predict_img(frame, init_params, False)
-
+        # OUTPUT IA
         print("---");
         rects = pred_anno['rects'] if type(pred_anno) is dict else pred_anno.rects
         for r in rects:
             print(r.left(), r.top(), r.right(), r.bottom())
-            canvas.create_rectangle(int(r.left()), int(r.top()), int(r.right()), int(r.bottom()), fill="blue")
-        root.update() # Start the GUI
-
+        #displayer.drawrectanglesifison(rects)
+        displayer.enddrawingifison()
 
 if __name__ == '__main__':
     main()
