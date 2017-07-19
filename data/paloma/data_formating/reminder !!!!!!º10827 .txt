@@ -1,0 +1,7 @@
+ejecutar pwd
+
+hacer
+
+“find “pwd”/imagesok/ -name “*.jpg” >> allimages 
+
+voc.name cambiar rutas absolutas
