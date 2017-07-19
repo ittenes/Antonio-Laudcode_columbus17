@@ -16,7 +16,7 @@ root = Tkinter.Tk()
 
 # Convert the Image object into a TkPhoto object
 
-canvas = Tkinter.Canvas(root, width=1200, height=1100)
+canvas = Tkinter.Canvas(root, width=512, height=512)
 canvas.pack()
 
 canvas.create_line(0, 0, 200, 100)

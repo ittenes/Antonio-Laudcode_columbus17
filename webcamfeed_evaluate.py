@@ -249,30 +249,23 @@ def main():
 
     # Convert the Image object into a TkPhoto object
 
-    canvas = Tkinter.Canvas(root, width=512, height=512)
+    canvas = Tkinter.Canvas(root, height=2000, width=2500, bd=0, highlightthickness=0, relief='ridge')
     canvas.pack()
-
-    canvas.create_line(0, 0, 200, 100)
-    canvas.create_line(0, 100, 200, 0, fill="red", dash=(4, 4))
-
-
-
 
     cap = cv2.VideoCapture(0)
     if cap.isOpened() == 0:
        cap.open(0)
-#       cap.set(4, 512)
-#       cap.set(3, 512)
+
     while(True):
         ret, frame = cap.read()
-        frame = frame[0:512, 0:512]
-        #time.sleep(1/25)
+        frame = frame#[0:512, 0:512]
+        #cv2.imwrite("cvresult.png", frame)
         b,g,r = cv2.split(frame)
         img2 = cv2.merge((r,g,b))
         im = Image.fromarray(img2)
         converted = ImageTk.PhotoImage(image=im)
-
-        canvas.create_image(0, 0, image=converted)
+        #im.save("tkresult.png")
+        canvas.create_image(0, 0, image=converted, anchor=Tkinter.NW)
 
         pred_anno = hot_predict_img(frame, init_params, False)
 
@@ -282,12 +275,6 @@ def main():
             print(r.left(), r.top(), r.right(), r.bottom())
             canvas.create_rectangle(int(r.left()), int(r.top()), int(r.right()), int(r.bottom()), fill="blue")
         root.update() # Start the GUI
-
-
-
-    # time.sleep(30)
-    #cap.release()
-    #cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':

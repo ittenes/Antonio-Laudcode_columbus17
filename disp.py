@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-import Tkinter 
+import Tkinter
 from PIL import Image
 from PIL import ImageTk
 import time
@@ -12,13 +12,13 @@ b,g,r = cv2.split(img)
 img = cv2.merge((r,g,b))
 
 # A root window for displaying objects
-root = Tkinter.Tk()  
+root = Tkinter.Tk()
 
 # Convert the Image object into a TkPhoto object
 im = Image.fromarray(img)
-imgtk = ImageTk.PhotoImage(image=im) 
+imgtk = ImageTk.PhotoImage(image=im)
 
 # Put it in the display window
-Tkinter.Label(root, image=imgtk).pack() 
+Tkinter.Label(root, image=imgtk).pack()
 
 root.mainloop() # Start the GUI
