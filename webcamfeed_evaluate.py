@@ -30,28 +30,20 @@ class Displayer:
 
     def __init__(self,ison):
         self.ison = ison
-        #if self.ison:
+        if self.ison:
             # A root window for displaying objects
-        self.root = Tkinter.Tk()
-            # Convert the Image object into a TkPhoto object
-        self.canvas = Tkinter.Canvas(self.root, height=2000, width=2500, bd=0, highlightthickness=0, relief='ridge')
-        self.canvas.pack()
+            self.root = Tkinter.Tk()
+                # Convert the Image object into a TkPhoto object
+            self.canvas = Tkinter.Canvas(self.root, height=2000, width=2500, bd=0, highlightthickness=0, relief='ridge')
+            self.canvas.pack()
 
     def showifison(self, frame):
-        #if self.ison:
-        print('hola');
-
-        cv2.imwrite("outCV233333333333333333.jpg",frame)
-        b,g,r = cv2.split(frame)
-        img2 = cv2.merge((r,g,b))
-        im = Image.fromarray(img2)
-        converted = ImageTk.PhotoImage(image=im)
-
-        print('hola2');
-        converted.save("tkresult333333333333.png")
-        self.canvas.create_image(0, 0, image=converted, anchor=Tkinter.NW)
-
-        print('hola3');
+        if self.ison:
+            b,g,r = cv2.split(frame)
+            img2 = cv2.merge((r,g,b))
+            im = Image.fromarray(img2)
+            converted = ImageTk.PhotoImage(image=im)
+            self.canvas.create_image(0, 0, image=converted, anchor=Tkinter.NW)
 
     def drawrectanglesifison(self,rects):
         if self.ison:
@@ -59,8 +51,8 @@ class Displayer:
                 self.canvas.create_rectangle(int(r.left()), int(r.top()), int(r.right()), int(r.bottom()), fill="blue")
 
     def enddrawingifison(self):
-    #    if self.ison:
-        self.root.update()
+        if self.ison:
+            self.root.update()
 
 
 def initialize(weights_path, hypes_path, options=None):
@@ -268,6 +260,16 @@ def save_results_but_not_image(image_path, anno):
         al.saveJSON(fpath, anno)
     subprocess.call(['chmod', '777', fpath])
 
+#SERVER IMG
+def recvall(s, count):
+    buf = b''
+    while count:
+        newbuf = s.recv(count)
+        if not newbuf: return None
+        buf += newbuf
+        count -= len(newbuf)
+    return buf
+
 def main():
     parser = OptionParser(usage='usage: %prog [options] <image> <weights> <hypes>')
     parser.add_option('--gpu', action='store', type='int', default=0)
@@ -284,23 +286,76 @@ def main():
     displayer = Displayer(True)
 
     # webcam
-    cap = cv2.VideoCapture(0)
-    if cap.isOpened() == 0:
-       cap.open(0)
+    # cap = cv2.VideoCapture(0)
+    # if cap.isOpened() == 0:
+    #    cap.open(0)
 
+    #SERVER
+    import socket
+    import numpy
+
+    def recvall(sock, count):
+        buf = b''
+        while count:
+            newbuf = sock.recv(count)
+            if not newbuf: return None
+            buf += newbuf
+            count -= len(newbuf)
+        return buf
+
+    TCP_IP = '192.168.1.36'
+    TCP_PORT = 5001
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((TCP_IP, TCP_PORT))
+    s.listen(True)
+    conn, addr = s.accept()
+    print 'Connected by', addr
+
+
+
+    a=0
     while(True):
         # webcam
-        ret, frame = cap.read()
-        displayer.showifison(frame)
-        # IA
-        pred_anno = hot_predict_img(frame, init_params, False)
-        # OUTPUT IA
-        print("---");
-        rects = pred_anno['rects'] if type(pred_anno) is dict else pred_anno.rects
-        for r in rects:
-            print(r.left(), r.top(), r.right(), r.bottom())
+        #ret, frame = cap.read()
+        #displayer.showifison(frame)
+
+        #SERVER img
+        length = recvall(conn,16)
+        if length != None:
+            stringData = recvall(conn, int(length))
+            data = numpy.fromstring(stringData, dtype='uint8')
+
+            decimg=cv2.imdecode(data,1)
+
+            cv2.imwrite("./data/" + str(a) + ".jpg", decimg)
+            #conn.send(str(a))
+            a = a+1
+
+            # IA
+            pred_anno = hot_predict_img(decimg, init_params, False)
+            # OUTPUT IA
+            print("---");
+            rects = pred_anno['rects'] if type(pred_anno) is dict else pred_anno.rects
+            for r in rects:
+                print(r.left(), r.top(), r.right(), r.bottom())
+                conn.send(  str(int(r.left())) +"_"+
+                            str(int(r.top())) +"_"+
+                            str(int(r.right())) +"_"+
+                            str(int(r.bottom())) + ":")
+
+
+
         #displayer.drawrectanglesifison(rects)
-        displayer.enddrawingifison()
+        #displayer.enddrawingifison()
+
+        # SERVER
+
+
+    s.close()
+
+
+
 
 if __name__ == '__main__':
     main()
