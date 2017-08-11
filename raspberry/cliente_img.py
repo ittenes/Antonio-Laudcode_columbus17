@@ -12,8 +12,11 @@ TCP_PORT = 5001
 s = socket.socket()
 s.connect((TCP_IP, TCP_PORT))
 
-
+w = 1280
+h = 1024
 capture = cv2.VideoCapture(0)
+capture.set(3,w)
+capture.set(4,h)
 
 while (True):
 
@@ -24,9 +27,22 @@ while (True):
     data = numpy.array(imgencode)
     stringData = data.tostring()
 
+    decimg=cv2.imdecode(data,1)
+    cv2.imshow('CLIENT',decimg)
+
+
     s.send( str(len(stringData)).ljust(16))
     s.send( stringData )
 
     a = s.recv(1024)
     print a
+
+
+
+
+
+
+
+
+
 sock.close()

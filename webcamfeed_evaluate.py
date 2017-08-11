@@ -328,7 +328,7 @@ def main():
 
             decimg=cv2.imdecode(data,1)
 
-            cv2.imwrite("./data/" + str(a) + ".jpg", decimg)
+            cv2.imwrite("./data/00.jpg", decimg)
             #conn.send(str(a))
             a = a+1
 

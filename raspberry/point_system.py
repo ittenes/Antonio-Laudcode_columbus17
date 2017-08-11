@@ -1,21 +1,17 @@
 #!/usr/bin/python
-import socket
-from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor, Adafruit_StepperMotor
+
+import RPi.GPIO as IO         # we are calling for header file which helps us use GPIO of PI
 import time
+
+######## PARTE PARA QUITAR CUANDO SE INTEGRE
+
+from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor, Adafruit_StepperMotor
 import atexit
 import threading
 import random
-import RPi.GPIO as IO
-import sys
-import cv2
-import numpy
 
-TCP_IP = '192.168.1.36'
-TCP_PORT = 5001
-sock = socket.socket()
-sock.connect((TCP_IP, TCP_PORT))
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.settimeout(2)
+#--------------------------------------------
+
 
 ''' CALIBRATE SISTEM
     motor 01 in GPIO 19 - 24
@@ -64,50 +60,10 @@ def stepper_worker(stepper, numsteps, direction, style):
     print("Done")
 
 step_1 = 0
-step_2 = 0         # 30 RPM
-
-length = None
-buffer = ""
-
-w = 1280
-h = 1024
-capture = cv2.VideoCapture(0)
-capture.set(3,w)
-capture.set(4,h)
+step_2 = 0
 
 try:
-    while (True):
-
-        #FOTO
-
-        ret, frame = capture.read()
-
-        encode_param=[int(cv2.IMWRITE_JPEG_QUALITY),90]
-        result, imgencode = cv2.imencode('.jpg', frame, encode_param)
-        data = numpy.array(imgencode)
-        stringData = data.tostring()
-
-        decimg=cv2.imdecode(data,1)
-        cv2.imshow('CLIENT',decimg)
-
-        sock.send( str(len(stringData)).ljust(16))
-        sock.send( stringData )
-
-        #DATOS
-        while:
-            try:
-                data_pos = s.recv(50)
-                buffer += data_pos
-                length_str, ignored, buffer = buffer.rpartition(':')
-                buffer, ignored, length = length_str.rpartition(':')
-                print("Microsteps", length)
-                myStepper1.step(10, Adafruit_MotorHAT.FORWARD,  Adafruit_MotorHAT.MICROSTEP)
-                break
-            except socket.error, e:
-                time.sleep(1)    # Something else happened, handle error, exit, etc.
-                print e
-
-
+    while 1:                               # execute loop forever
         if(IO.input(21) == False):            #if button1 is pressed
             #myStepper1.step(1, Adafruit_MotorHAT.FORWARD,  Adafruit_MotorHAT.MICROSTEP)
             st1F = threading.Thread(target=stepper_worker, args=(myStepper1, 1, Adafruit_MotorHAT.FORWARD, stepstyles[3],))
@@ -158,10 +114,13 @@ try:
 
 
 
+
+
+
+
+
+
 except KeyboardInterrupt:
     IO.cleanup()
-    s.close()
 
 IO.cleanup()
-
-s.close()
