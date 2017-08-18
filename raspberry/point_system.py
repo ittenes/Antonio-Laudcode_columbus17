@@ -98,7 +98,7 @@ try:
 
         ''' POSITION OF DE PIGNION EYE AND AIM THE LASER '''
 
-        data = ('100_200_300_400')
+        data = s.recv(1024)
 
         array_data = data.split('_')
 
@@ -108,16 +108,6 @@ try:
         y2 = array_data[3]
 
         print x1, x2, y1, y2
-
-        w = 1280
-        h = 1024
-
-
-
-
-
-
-
 
 
 except KeyboardInterrupt:
